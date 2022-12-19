@@ -27,6 +27,8 @@ Example command:
 python estimateTelLength/estimateTelSize.py --noseq --nofig ./example/sample.telomeric_longreads.fasta.gz > test.telsize.txt
 ```
 
+A full description of options and arguments are as follow:
+
 ```
 usage: estimateTelSize.py [-h] [--cutoff cutoff] [--movave movave]
                           [--movmed movmed] [--motif motif] [--format format]
