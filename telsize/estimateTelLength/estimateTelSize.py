@@ -2,10 +2,10 @@
 
 import sys
 import os
+import time
 import argparse
 import multiprocessing
 from estimateTelomereLength import *
-from estimateTelomerePenalty import *
 from analyze_reads import classify_site
 
 def read_fasta(fp):
@@ -50,8 +50,7 @@ def check_motif_present(sequence, motif):
 def analyze_read_parallel(data, env_params):
 	(seq_name, seq) = data
 	(short_motif, long_motif, long_motif_revCom, pic_format, \
-        AverageTelomereSignalCutoff, movingAveWindow, medianKernelSize, folder, \
-        penalty, penaltyval) = env_params
+        AverageTelomereSignalCutoff, movingAveWindow, medianKernelSize, folder, plot_fig) = env_params
 
 	# Skip sequences without the motif	
 	if not (check_motif_present(seq, long_motif) or check_motif_present(seq, long_motif_revCom)):
@@ -70,21 +69,11 @@ def analyze_read_parallel(data, env_params):
 
 		return result
 
-	(TelomereStart, TelomereEnd, TelomereLength, TelomereRegions,\
-		AverageTelomereSignal, stringLength, strand, string) = \
-	("NA", "NA", "NA", "NA", "NA", "NA", "NA", "NA")
-	if not penalty:
-		(TelomereStart, TelomereEnd, TelomereLength, TelomereRegions,
-		AverageTelomereSignal, stringLength, strand, string) \
-		= analyze_sequence_for_motif(seq, short_motif, seq_name, pic_format=pic_format, \
-		threshold=AverageTelomereSignalCutoff, movingAveWindow=movingAveWindow, \
-		medianKernelSize=medianKernelSize, folder=folder)
-	else:
-		(TelomereStart, TelomereEnd, TelomereLength, TelomereRegions,
-		AverageTelomereSignal, stringLength, strand, string) \
-		= analyze_sequence_for_motif_penalty(seq, short_motif, seq_name, pic_format=pic_format, \
-		penalty=penaltyval, folder=folder)
-
+	(TelomereStart, TelomereEnd, TelomereLength, TelomereRegions,
+	AverageTelomereSignal, stringLength, strand, string) \
+	= analyze_sequence_for_motif(seq, short_motif, seq_name, pic_format=pic_format, \
+	threshold=AverageTelomereSignalCutoff, movingAveWindow=movingAveWindow, \
+	medianKernelSize=medianKernelSize, folder=folder, plot_fig=plot_fig)
 
 
 	classification = classify_site(TelomereStart, TelomereEnd, stringLength, bufferlen=50)
@@ -98,14 +87,16 @@ def analyze_read_parallel(data, env_params):
 
 def main(fasta_file, short_motif = "TTAGGG", pic_format="png", AverageTelomereSignalCutoff=0.2,
 	movingAveWindow=50, medianKernelSize=501, threads=12, folder="./", noseq=False,
-	penalty=False, penaltyval=0.5):
+	penalty=False, penaltyval=0.5, plot_fig=True):
 
 	long_motif = short_motif + short_motif
 	long_motif_revCom = reverseComplement(long_motif)
 	
 	total = 0
 	hits = 0
-	fasta_file_handle = open(fasta_file, 'r')
+	#fasta_file_handle = open(fasta_file, 'r')
+	fasta_file_handle = os.popen("zcat -f %s" %fasta_file) # to support gzip file
+
 
 	# Header
 	header = ()
@@ -149,8 +140,7 @@ def main(fasta_file, short_motif = "TTAGGG", pic_format="png", AverageTelomereSi
 	#########################
 	reads = [(seq_name, seq) for seq_name, seq in read_fasta(fasta_file_handle)]
 	env_params = [(short_motif, long_motif, long_motif_revCom, pic_format, \
-	AverageTelomereSignalCutoff, movingAveWindow, medianKernelSize, folder, \
-	penalty, penaltyval)] * len(reads)
+	AverageTelomereSignalCutoff, movingAveWindow, medianKernelSize, folder, plot_fig)] * len(reads)
 
 	pool = multiprocessing.Pool(threads)
 	results = pool.starmap(analyze_read_parallel, zip(reads, env_params))
@@ -180,8 +170,13 @@ def main(fasta_file, short_motif = "TTAGGG", pic_format="png", AverageTelomereSi
 if __name__ == "__main__":
 	parser = argparse.ArgumentParser(description='Get length for repeats in fasta',
 	formatter_class=argparse.ArgumentDefaultsHelpFormatter)
+	
+	currtime = int(time.time())
+	image_dir = "./img_" + str(currtime) + "/"
+
+
 	parser.add_argument('fasta', metavar='fasta', type=str, nargs=1,
-                    help='fasta file to evaluate')
+                    help='fasta file to evaluate (unzipped|gzipped)')
 	parser.add_argument('--cutoff', metavar='cutoff', type=float, default=0.35,
 					help='cutoff of repeat signal')
 	parser.add_argument('--movave', metavar='movave', type=int, default=50,
@@ -192,12 +187,14 @@ if __name__ == "__main__":
 					help='motif to assess for repeat signal (e.g. TTAGGG)')
 	parser.add_argument('--format', metavar='format', type=str, default='pdf',
 					help='output file type (e.g. pdf, png)')
-	parser.add_argument('--folder', metavar='folder', type=str, default='./',
+	parser.add_argument('--folder', metavar='folder', type=str, default=image_dir,
                                         help='folder for images')
 	parser.add_argument('--noseq', action='store_true',
 					help='do not print sequence of read in output')
-	parser.add_argument('--fastq', metavar='fastq', type=str, default='./',
-                                        help='folder for images')
+	parser.add_argument('--nofig', action='store_false',
+					help='do not plot figures for sequences')
+	#parser.add_argument('--fastq', metavar='fastq', type=str, default='./',
+        #                                help='folder for images')
 	parser.add_argument('--threads', metavar='threads', type=int, default=12,
                                         help='number of threads to use')
 	parser.add_argument('--penalty', action='store_true',
@@ -210,5 +207,5 @@ if __name__ == "__main__":
 	main(args.fasta[0], pic_format=args.format, AverageTelomereSignalCutoff=args.cutoff,
 		short_motif = args.motif, movingAveWindow=args.movave, medianKernelSize=args.movmed,
 		folder=args.folder, threads = args.threads, noseq=args.noseq,
-		penalty=args.penalty, penaltyval=args.penaltyval)
+		penalty=args.penalty, penaltyval=args.penaltyval, plot_fig=args.nofig)
 

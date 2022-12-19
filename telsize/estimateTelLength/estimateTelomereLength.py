@@ -159,7 +159,7 @@ def analyze_sequence_for_motif(string, motif, sequence_name, pic_format="png",
 		os.mkdir(folder)
 	sequence_name_clean = re.sub("/", "_", sequence_name) # in case slash is in the readname
 	output_image = folder + sequence_name_clean + "." + pic_format
-
+	#print(output_image)	
 	stringLength = len(string)
 	motifRevComplement = reverseComplement(motif)
 

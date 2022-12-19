@@ -7,11 +7,16 @@ use File::Basename;
 
 my $inputfile 	= $ARGV[0];
 my $label 	= $ARGV[1];
-my $repeat_cutoff = 1;
+if (scalar @ARGV != 2){
+	die "Usage: $0 <input_fasta> <output_label>\n";
+}
+
+my $repeat_cutoff = 4;
 my $dirname 	= dirname(__FILE__);
 my $repeat_count_file = $label . ".repeatcounts";
 my $repeat_count_file_filtered =  $label . ".repeatcounts.filtered";
 my $repeat_count_file_filtered_readname =  $label . ".repeatcounts.filtered.readname";
+my $extracted_fasta = $label . ".telomeric.fasta";
 
 # Check if file is a bam or a fasta file
 if($inputfile =~ /\.bam$/){
@@ -39,6 +44,16 @@ while(my $line = <$REPEATCOUNT>){
 close($REPEATCOUNT);
 close($REPEATCOUNTFILTERED);
 
+# Get readnames required
 system("cut -f1 $repeat_count_file_filtered > $repeat_count_file_filtered_readname");
+
+
+# Extract telomeric fasta
+system("perl $dirname/extract_reads_based_on_readnames.fasta.pl $repeat_count_file_filtered_readname $inputfile > $extracted_fasta");
+
+
+# Compress fasta file
+system("gzip $extracted_fasta");
+
 
 

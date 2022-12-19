@@ -16,7 +16,7 @@ while(my $line = <$READNAMES>){
 close($READNAMES);
 
 
-open(my $FASTA, "-|", "zcat $fastafile") || die $!;
+open(my $FASTA, "-|", "zcat -f $fastafile") || die $!;
 while(my $readname = <$FASTA>){
 	chomp($readname);
 	my $readname_clean = substr($readname, 1);
