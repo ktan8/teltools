@@ -3,6 +3,10 @@ TelSize is a package for estimating telomere length from long-read sequencing da
 
 The TelSize package consists of two pipeline. The first pipeline extracts telomeric long-reads from sequencing data for deeper analysis. The second pipeline analyzes these telomeric reads in greater detail and provides telomeric length estimates.
 
+An example of telomere length estimate from single long-reads is depicted in the image below:
+
+![Examples](img/telomere_length_estimate_longreads.png)
+
 ## Requirements
 - Perl 5
 - Python 3
