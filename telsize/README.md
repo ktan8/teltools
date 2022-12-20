@@ -5,7 +5,7 @@ The TelSize package consists of two pipeline. The first pipeline extracts telome
 
 An example of telomere length estimate from single long-reads is depicted in the image below:
 
-![Examples](img/telomere_length_estimate_longreads.png)
+![Examples](/img/telomere_length_estimate_longreads.png)
 
 ## Requirements
 - Perl 5
