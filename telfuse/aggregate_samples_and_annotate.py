@@ -7,18 +7,21 @@ folder = sys.argv[1]
 label = sys.argv[2]
 genome = sys.argv[3]
 
+
+script_path = os.path.dirname(os.path.realpath(sys.argv[0]))
+
 ###################################################
 # 6. Aggregate multiple samples into a single file
 ###################################################
 aggregated_file = label + ".aggregated_samples.txt"
-os.system("python pipeline/_6_aggregate_samples/aggregate_samples.py %s > %s" %(folder, aggregated_file))
+os.system("python %s/pipeline/_6_aggregate_samples/aggregate_samples.py %s > %s" %(script_path, folder, aggregated_file))
 
 
 ###################################################
 # 7. Generate a panel of normal
 ###################################################
 PON_file = label + ".aggregated_samples.PON.txt"
-os.system("python pipeline/_7_generate_pon/generate_PON.py %s > %s" %(aggregated_file, PON_file))
+os.system("python %s/pipeline/_7_generate_pon/generate_PON.py %s > %s" %(script_path, aggregated_file, PON_file))
 
 
 ###################################################
@@ -26,28 +29,28 @@ os.system("python pipeline/_7_generate_pon/generate_PON.py %s > %s" %(aggregated
 ###################################################
 aggregated_edge_file = label + ".aggregated_samples.edge.txt"
 genome_fai = genome + ".fai"
-os.system("python pipeline/_8_add_annotation/annotate_edge.py %s %s > %s" %(aggregated_file, genome_fai, aggregated_edge_file))
+os.system("python %s/pipeline/_8_add_annotation/annotate_edge.py %s %s > %s" %(script_path, aggregated_file, genome_fai, aggregated_edge_file))
 
 
 ###################################################
 # 9. Add PON information
 ###################################################
 aggregated_edge_pon_file = label + ".aggregated_samples.edge.pon.txt"
-os.system("python pipeline/_8_add_annotation/annotate_PON.py %s %s > %s" %(aggregated_edge_file, PON_file, aggregated_edge_pon_file))
+os.system("python %s/pipeline/_8_add_annotation/annotate_PON.py %s %s > %s" %(script_path, aggregated_edge_file, PON_file, aggregated_edge_pon_file))
 
 
 ###################################################
 # 10. Classify telomeric sites
 ###################################################
 aggregated_edge_pon_telo_file = label + ".aggregated_samples.edge.pon.teloclassification.txt"
-os.system("python pipeline/_8_add_annotation/classify_telomeric_sites.py %s > %s" %(aggregated_edge_pon_file, aggregated_edge_pon_telo_file))
+os.system("python %s/pipeline/_8_add_annotation/classify_telomeric_sites.py %s > %s" %(script_path, aggregated_edge_pon_file, aggregated_edge_pon_telo_file))
 
 
 ###################################################
 # 11. Filter for sites meeting criteria
 ###################################################
 aggregated_edge_pon_telo_filtered_file = label + ".aggregated_samples.edge.pon.teloclassification.filtered.txt"
-os.system("bash pipeline/_9_filter_sites/filtersites.sh %s > %s" %(aggregated_edge_pon_telo_file, aggregated_edge_pon_telo_filtered_file))
+os.system("bash %s/pipeline/_9_filter_sites/filtersites.sh %s > %s" %(script_path, aggregated_edge_pon_telo_file, aggregated_edge_pon_telo_filtered_file))
 
 # os.system("awk -F \"\t\" '{if($15 == 0 && $16==1 && $5>=3 && $6>=0.95){print}}\' aggregated_sites.withMapQ.edge.PON.classification.txt") 
 # # > aggregated_sites.withMapQ.edge.PON.classification.filtered.txt
@@ -72,7 +75,7 @@ header = ["Sample", "Chromosome", "Position", "Softclipped_orientation",
 
 header_str = "\t".join(header)
 os.system("echo \'%s\' > %s" %(header_str, aggregated_edge_pon_telo_filtered_genome_file))
-os.system("perl pipeline/_8_add_annotation/extract_ref_sequence.v2.pl %s %s >> %s" %(aggregated_edge_pon_telo_filtered_file, genome, aggregated_edge_pon_telo_filtered_genome_file))
+os.system("perl %s/pipeline/_8_add_annotation/extract_ref_sequence.v2.pl %s %s >> %s" %(script_path, aggregated_edge_pon_telo_filtered_file, genome, aggregated_edge_pon_telo_filtered_genome_file))
 
 
 
