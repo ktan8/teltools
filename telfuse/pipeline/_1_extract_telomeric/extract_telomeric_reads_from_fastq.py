@@ -3,6 +3,8 @@
 import sys
 import os
 import subprocess
+#sys.path.append(os.path.join(os.path.dirname(__file__), "lib"))
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), "./"))
 from lib.identify_telomeric_sequence import *
 
 def runProcess(exe):
