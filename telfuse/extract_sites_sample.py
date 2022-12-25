@@ -5,7 +5,7 @@ from pipeline._1_extract_telomeric.extract_telomeric_reads_from_fastq import ext
 from pipeline._1_extract_telomeric.extract_telomeric_reads_from_bam import extract_telomeric_bam
 #from 4_identify_softclip_sites.extract_softclipped_sites import extract_softclipped_sites
 
-
+script_path = os.path.dirname(os.path.realpath(sys.argv[0]))
 
 def main(bamfile, genome, label):
 	#####################################
@@ -15,7 +15,7 @@ def main(bamfile, genome, label):
 	#extract_telomeric_fastq(fastq1, fastq2, label)
 
 	# Extract telomeric reads (bamfile)
-	extract_telomeric_bam(bamfile, label)
+	########extract_telomeric_bam(bamfile, label)
 
 	#####################################
 	# 2. Align extracted reads to reference
@@ -23,7 +23,8 @@ def main(bamfile, genome, label):
 	fastq1 = label + ".fq1.gz"
 	fastq2 = label + ".fq2.gz"
 	telomeric_aligned_bam_label = label + ".telomeric.aligned_ref"
-	os.system("perl pipeline/_2_align_to_ref/align_single_sample.pl --genome %s %s %s %s" %(genome, fastq1, fastq2, telomeric_aligned_bam_label))
+	align_sample_script = script_path + "/pipeline/_2_align_to_ref/align_single_sample.pl"
+	os.system("perl %s --genome %s %s %s %s" %(align_sample_script, genome, fastq1, fastq2, telomeric_aligned_bam_label))
 
 	#print("perl pipeline/_2_align_to_ref/align_single_sample.pl --genome %s %s %s %s" %(genome, fastq1, fastq2, telomeric_aligned_bam_label))
 
@@ -32,22 +33,25 @@ def main(bamfile, genome, label):
 	#####################################
 	telomeric_aligned_bam = label + ".telomeric.aligned_ref.sorted.bam"
 	telomeric_aligned_softclipped_bam = label + ".telomeric.aligned_ref.softclipped.bam"
+	extract_softclipped_mapping_script = script_path + "/pipeline/_3_extract_softclip_reads/extract_soft_clipped_mappings.pl"
 
-	os.system("perl pipeline/_3_extract_softclip_reads/extract_soft_clipped_mappings.pl %s | samtools view -b > %s" %(telomeric_aligned_bam, telomeric_aligned_softclipped_bam))
+	os.system("perl %s %s | samtools view -b > %s" %(extract_softclipped_mapping_script, telomeric_aligned_bam, telomeric_aligned_softclipped_bam))
 
 	#####################################
 	# 4. Identify sites from softclipped bam
 	#####################################
 	# python ~/code/FuseTect/identify_intra_telomeric_sites/extract_softclipped_sites.py {} '>' {/.}.analysis.txt
 	telomeric_aligned_softclipped_sites = label + ".telomeric.aligned_ref.softclipped.sites"
-	os.system("python pipeline/_4_identify_softclip_sites/extract_softclipped_sites.py %s > %s" %(telomeric_aligned_softclipped_bam, telomeric_aligned_softclipped_sites))
+	extract_softclipped_sites_script = script_path + "/pipeline/_4_identify_softclip_sites/extract_softclipped_sites.py"
+	os.system("python %s %s > %s" %(extract_softclipped_sites_script, telomeric_aligned_softclipped_bam, telomeric_aligned_softclipped_sites))
 
 
 	####################################
 	# 5. Aggregate softclipped sites in single sample
 	####################################
 	telomeric_aligned_softclipped_sites_aggregated = label + ".telomeric.aligned_ref.softclipped.sites.aggregated"
-	os.system("python pipeline/_5_aggregate_softclip_reads/softclipped_analysis.py %s > %s" %(telomeric_aligned_softclipped_sites, telomeric_aligned_softclipped_sites_aggregated))
+	softclipped_analysis_script = script_path + "/pipeline/_5_aggregate_softclip_reads/softclipped_analysis.py"
+	os.system("python %s %s > %s" %(softclipped_analysis_script, telomeric_aligned_softclipped_sites, telomeric_aligned_softclipped_sites_aggregated))
 
 
 
