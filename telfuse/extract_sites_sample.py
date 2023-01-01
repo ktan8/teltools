@@ -15,7 +15,7 @@ def main(bamfile, genome, label):
 	#extract_telomeric_fastq(fastq1, fastq2, label)
 
 	# Extract telomeric reads (bamfile)
-	########extract_telomeric_bam(bamfile, label)
+	extract_telomeric_bam(bamfile, label)
 
 	#####################################
 	# 2. Align extracted reads to reference
