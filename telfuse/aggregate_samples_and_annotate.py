@@ -75,7 +75,7 @@ header = ["Sample", "Chromosome", "Position", "Softclipped_orientation",
 
 header_str = "\t".join(header)
 os.system("echo \'%s\' > %s" %(header_str, aggregated_edge_pon_telo_filtered_genome_file))
-os.system("perl %s/pipeline/_8_add_annotation/extract_ref_sequence.v2.pl %s %s >> %s" %(script_path, aggregated_edge_pon_telo_filtered_file, genome, aggregated_edge_pon_telo_filtered_genome_file))
+os.system("perl %s/pipeline/_8_add_annotation/extract_ref_sequence.v3.pl %s %s >> %s" %(script_path, aggregated_edge_pon_telo_filtered_file, genome, aggregated_edge_pon_telo_filtered_genome_file))
 
 
 
