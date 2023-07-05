@@ -7,15 +7,17 @@ from pipeline._1_extract_telomeric.extract_telomeric_reads_from_bam import extra
 
 script_path = os.path.dirname(os.path.realpath(sys.argv[0]))
 
-def main(bamfile, genome, label):
+def main(bamfile, genome, label, skipbam=False):
 	#####################################
 	# 1. Extract telomeric reads for analysis
 	#####################################
 	# Extract telomeric reads (fastq)
 	#extract_telomeric_fastq(fastq1, fastq2, label)
 
-	# Extract telomeric reads (bamfile)
-	extract_telomeric_bam(bamfile, label)
+	if not skipbam:
+		# Extract telomeric reads (bamfile)
+		extract_telomeric_bam(bamfile, label)
+
 
 	#####################################
 	# 2. Align extracted reads to reference
@@ -96,7 +98,9 @@ if __name__ == "__main__":
 		help='reference genome to map reads onto')
 	parser.add_argument('label', metavar='label', type=str, nargs=1,
 		help='output label indicating path/prefix for output files')
-	# parser.add_argument('--cutoff', metavar='cutoff', type=float, default=0.35,
+	parser.add_argument('--skipbam', action='store_true',
+                help='skip extraction step from bamfile')
+        # parser.add_argument('--cutoff', metavar='cutoff', type=float, default=0.35,
 	# 				help='cutoff of repeat signal')
 	# parser.add_argument('--movave', metavar='movave', type=int, default=50,
  #                                        help='Window size for moving average window')
@@ -129,4 +133,4 @@ if __name__ == "__main__":
 	# 	penalty=args.penalty, penaltyval=args.penaltyval, plot_fig=args.nofig)
 
 
-	main(args.bamfile[0], args.genome[0], args.label[0])
+	main(args.bamfile[0], args.genome[0], args.label[0], skipbam=args.skipbam)
