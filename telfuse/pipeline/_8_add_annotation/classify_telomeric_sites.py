@@ -1,7 +1,7 @@
 #!/usr/bin/python
 
 import sys
-
+import re
 
 candidate_file = sys.argv[1]
 
@@ -36,6 +36,15 @@ def generateMotifCombinations(sequence):
         return seqCombinations
 
 
+def check_seq_for_multiple_motifs(sequence, motif_set):
+    pattern = "|".join(motif_set)
+    result = re.search(pattern, sequence)
+ 
+    if result is None:
+        return 0
+    else:
+        return 1
+
 telomere_seq = "TTAGGGTTAGGG"
 telomere_seq_revcom = reverseComplement(telomere_seq)
 
@@ -59,9 +68,9 @@ for line in candidates:
         classification = "new_telomere"
     elif softclipped_seq_terminal in fusion_seq_combinations:
         classification = "arm_fusion"
-    elif softclipped_seq in telomere_seq_combinations:
+    elif check_seq_for_multiple_motifs(softclipped_seq, telomere_seq_combinations):
         classification = "new_telomere_like"
-    elif softclipped_seq in fusion_seq_combinations:
+    elif check_seq_for_multiple_motifs(softclipped_seq, fusion_seq_combinations):
         classification = "arm_fusion_like"
 
     
