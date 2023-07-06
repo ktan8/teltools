@@ -59,6 +59,11 @@ for line in candidates:
         classification = "new_telomere"
     elif softclipped_seq_terminal in fusion_seq_combinations:
         classification = "arm_fusion"
+    elif softclipped_seq in telomere_seq_combinations:
+        classification = "new_telomere_like"
+    elif softclipped_seq in fusion_seq_combinations:
+        classification = "arm_fusion_like"
+
     
     lineList = lineList + [softclipped_seq_terminal, classification]
 
