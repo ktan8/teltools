@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 import sys
+from collections import defaultdict
 
 class softclipped_reads:
 	'''
@@ -13,6 +14,7 @@ class softclipped_reads:
 		self.softclippedseqs = list_of_softclippedseqs
 		#print(list_of_softclippedseqs)
 		self.num_seqs = len(self.softclippedseqs)
+                self.num_seq_dedup = self.count_numseq_dedup()
 		self.longest_seq_len = self.longest_seq_len(self.softclippedseqs)
 		self.consensus_seq = self.get_consensus_seq()
 
@@ -36,6 +38,20 @@ class softclipped_reads:
 			if len(seq) > max_seqlen:
 				max_seqlen = len(seq)
 		return max_seqlen
+
+        def count_numseq_dedup(self):
+                '''
+                Count the number of non-duplicated
+                reads. This does not consider if the 
+                reads are pointing to the left or to
+                the right.
+                '''
+                seq_len_dict = defaultdict(int)
+                for seq in self.softclippedseqs:
+                    seq_len_dict[len(seq)] += 1
+                unique_seq_count = len(seq_len_dict.keys)
+
+                return unique_seq_count
 
 
 	def get_consensus_seq(self):
@@ -183,7 +199,7 @@ class softclipped_aggregated_sites:
 			softclippedseqsforPosnObj = softclipped_reads(softclippedseqsforPosn)
 
 
-			num_seqs = softclippedseqsforPosnObj.num_seqs
+			num_seqs_dedup = softclippedseqsforPosnObj.num_seqs_dedup
 			consensus_seq = softclippedseqsforPosnObj.consensus_seq
 			ave_seq_identity, ave_weighted_seq_identity = \
 			softclippedseqsforPosnObj.calc_sequence_identity()
@@ -192,7 +208,7 @@ class softclipped_aggregated_sites:
 
 			# print(key)
 			chrom, posn, orientation = key.split("|")
-			result = [chrom, posn, orientation, num_seqs, ave_seq_identity, \
+			result = [chrom, posn, orientation, num_seqs_dedup, ave_seq_identity, \
 			ave_weighted_seq_identity, consensus_seq, softclip_ave_posn_on_read, \
 			ave_mapQ, min_mapQ, max_mapQ]
 
