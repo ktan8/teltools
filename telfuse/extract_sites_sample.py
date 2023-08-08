@@ -7,7 +7,7 @@ from pipeline._1_extract_telomeric.extract_telomeric_reads_from_bam import extra
 
 script_path = os.path.dirname(os.path.realpath(sys.argv[0]))
 
-def main(bamfile, genome, label, skipbam=False):
+def main(bamfile, genome, label, skipbam=False, start_from=1):
 	#####################################
 	# 1. Extract telomeric reads for analysis
 	#####################################
@@ -16,7 +16,8 @@ def main(bamfile, genome, label, skipbam=False):
 
 	if not skipbam:
 		# Extract telomeric reads (bamfile)
-		extract_telomeric_bam(bamfile, label)
+		if start_from <= 1:
+			extract_telomeric_bam(bamfile, label)
 
 
 	#####################################
@@ -26,9 +27,9 @@ def main(bamfile, genome, label, skipbam=False):
 	fastq2 = label + ".fq2.gz"
 	telomeric_aligned_bam_label = label + ".telomeric.aligned_ref"
 	align_sample_script = script_path + "/pipeline/_2_align_to_ref/align_single_sample.pl"
-	os.system("perl %s --genome %s %s %s %s" %(align_sample_script, genome, fastq1, fastq2, telomeric_aligned_bam_label))
+	if start_from <= 2:
+            os.system("perl %s --genome %s %s %s %s" %(align_sample_script, genome, fastq1, fastq2, telomeric_aligned_bam_label))
 
-	#print("perl pipeline/_2_align_to_ref/align_single_sample.pl --genome %s %s %s %s" %(genome, fastq1, fastq2, telomeric_aligned_bam_label))
 
 	#####################################
 	# 3. Extract softclipped mappings
@@ -36,8 +37,9 @@ def main(bamfile, genome, label, skipbam=False):
 	telomeric_aligned_bam = label + ".telomeric.aligned_ref.sorted.bam"
 	telomeric_aligned_softclipped_bam = label + ".telomeric.aligned_ref.softclipped.bam"
 	extract_softclipped_mapping_script = script_path + "/pipeline/_3_extract_softclip_reads/extract_soft_clipped_mappings.pl"
+	if start_from <= 3:
+		os.system("perl %s %s | samtools view -b > %s" %(extract_softclipped_mapping_script, telomeric_aligned_bam, telomeric_aligned_softclipped_bam))
 
-	os.system("perl %s %s | samtools view -b > %s" %(extract_softclipped_mapping_script, telomeric_aligned_bam, telomeric_aligned_softclipped_bam))
 
 	#####################################
 	# 4. Identify sites from softclipped bam
@@ -45,7 +47,8 @@ def main(bamfile, genome, label, skipbam=False):
 	# python ~/code/FuseTect/identify_intra_telomeric_sites/extract_softclipped_sites.py {} '>' {/.}.analysis.txt
 	telomeric_aligned_softclipped_sites = label + ".telomeric.aligned_ref.softclipped.sites"
 	extract_softclipped_sites_script = script_path + "/pipeline/_4_identify_softclip_sites/extract_softclipped_sites.py"
-	os.system("python %s %s > %s" %(extract_softclipped_sites_script, telomeric_aligned_softclipped_bam, telomeric_aligned_softclipped_sites))
+	if start_from <= 4:
+		os.system("python %s %s > %s" %(extract_softclipped_sites_script, telomeric_aligned_softclipped_bam, telomeric_aligned_softclipped_sites))
 
 
 	####################################
@@ -53,10 +56,8 @@ def main(bamfile, genome, label, skipbam=False):
 	####################################
 	telomeric_aligned_softclipped_sites_aggregated = label + ".telomeric.aligned_ref.softclipped.sites.aggregated"
 	softclipped_analysis_script = script_path + "/pipeline/_5_aggregate_softclip_reads/softclipped_analysis.py"
-	os.system("python %s %s > %s" %(softclipped_analysis_script, telomeric_aligned_softclipped_sites, telomeric_aligned_softclipped_sites_aggregated))
-
-
-
+	if start_from <= 5:
+		os.system("python %s %s > %s" %(softclipped_analysis_script, telomeric_aligned_softclipped_sites, telomeric_aligned_softclipped_sites_aggregated))
 
 
 
@@ -99,7 +100,9 @@ if __name__ == "__main__":
 	parser.add_argument('label', metavar='label', type=str, nargs=1,
 		help='output label indicating path/prefix for output files')
 	parser.add_argument('--skipbam', action='store_true',
-                help='skip extraction step from bamfile')
+		help='skip extraction step from bamfile')
+	parser.add_argument('--startstep', metavar='startstep', type=int, default=1,
+		help='Which step to start the analysis from, while skipping earlier steps')
         # parser.add_argument('--cutoff', metavar='cutoff', type=float, default=0.35,
 	# 				help='cutoff of repeat signal')
 	# parser.add_argument('--movave', metavar='movave', type=int, default=50,
@@ -133,4 +136,7 @@ if __name__ == "__main__":
 	# 	penalty=args.penalty, penaltyval=args.penaltyval, plot_fig=args.nofig)
 
 
-	main(args.bamfile[0], args.genome[0], args.label[0], skipbam=args.skipbam)
+	main(args.bamfile[0], args.genome[0], args.label[0], skipbam=args.skipbam, start_from=args.startstep)
+
+
+
