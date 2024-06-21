@@ -105,7 +105,8 @@ def calc_telomere_length(countsAcrossRead, threshold=0.05):
 
 	# Deal with case where the whole sequence is telomeric
 	if regionAboveThreshold[0] == True:
-		falseToTrue.append(0)
+		#falseToTrue.append(0)
+		falseToTrue.insert(0,1)
 	if regionAboveThreshold[-1] == True:
 			trueToFalse.append(len(regionAboveThreshold))
 
