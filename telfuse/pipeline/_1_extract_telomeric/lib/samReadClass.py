@@ -87,6 +87,16 @@ class samRead:
 		Get the read number within the pair
 		'''
 		return self.ReadNumInPair
+	
+	def getAlignmentOrientation(self):
+		'''
+		Get the orientation of the alignment
+		from the cigar flag
+		'''
+		if(int(self.Flag) & 16 == 16):
+			return "reverse"
+		else:
+			return "forward"
 
 	
 def reverseString(string):

@@ -7,7 +7,7 @@ from pipeline._1_extract_telomeric.extract_telomeric_reads_from_bam import extra
 
 script_path = os.path.dirname(os.path.realpath(sys.argv[0]))
 
-def main(bamfile, genome, label, skipbam=False, start_from=1):
+def main(bamfile, genome, label, skipbam=False, telomere_motif="TTAGGG", start_from=1):
 	#####################################
 	# 1. Extract telomeric reads for analysis
 	#####################################
@@ -17,7 +17,7 @@ def main(bamfile, genome, label, skipbam=False, start_from=1):
 	if not skipbam:
 		# Extract telomeric reads (bamfile)
 		if start_from <= 1:
-			extract_telomeric_bam(bamfile, label)
+			extract_telomeric_bam(bamfile, label, telomere_motif=telomere_motif)
 
 
 	#####################################
@@ -48,7 +48,7 @@ def main(bamfile, genome, label, skipbam=False, start_from=1):
 	telomeric_aligned_softclipped_sites = label + ".telomeric.aligned_ref.softclipped.sites"
 	extract_softclipped_sites_script = script_path + "/pipeline/_4_identify_softclip_sites/extract_softclipped_sites.py"
 	if start_from <= 4:
-		os.system("python %s %s > %s" %(extract_softclipped_sites_script, telomeric_aligned_softclipped_bam, telomeric_aligned_softclipped_sites))
+		os.system("python %s %s %s %s > %s" %(extract_softclipped_sites_script, telomeric_aligned_softclipped_bam, fastq1, fastq2, telomeric_aligned_softclipped_sites))
 
 
 	####################################
@@ -101,6 +101,8 @@ if __name__ == "__main__":
 		help='output label indicating path/prefix for output files')
 	parser.add_argument('--skipbam', action='store_true',
 		help='skip extraction step from bamfile')
+	parser.add_argument('--motif', metavar='motif', type=str, default='TTAGGG',
+		help='Telomeric motif to analyze')
 	parser.add_argument('--startstep', metavar='startstep', type=int, default=1,
 		help='Which step to start the analysis from, while skipping earlier steps')
         # parser.add_argument('--cutoff', metavar='cutoff', type=float, default=0.35,
@@ -136,7 +138,9 @@ if __name__ == "__main__":
 	# 	penalty=args.penalty, penaltyval=args.penaltyval, plot_fig=args.nofig)
 
 
-	main(args.bamfile[0], args.genome[0], args.label[0], skipbam=args.skipbam, start_from=args.startstep)
+	main(args.bamfile[0], args.genome[0], args.label[0], 
+        skipbam=args.skipbam, telomere_motif=args.motif,
+        start_from=args.startstep)
 
 
 

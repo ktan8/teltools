@@ -63,7 +63,7 @@ def write_samfile_with_reqr_reads(bamfile, samfile_withnames, file_handle):
 
 
 
-def extract_telomeric_bam(bamfile, label):
+def extract_telomeric_bam(bamfile, label, telomere_motif="TTAGGG"):
 	'''
 	Extract telomeric reads from bam file
 	'''
@@ -98,8 +98,7 @@ def extract_telomeric_bam(bamfile, label):
 		try:
 			sam_chunk_curr = sam_chunk(bam_iter)
 
-			if check_telomeric_sequence(sam_chunk_curr.sequence):
-				#print("apple")
+			if check_telomeric_sequence(sam_chunk_curr.sequence, telomere_motif = telomere_motif):
 				write_sam_to_file(sam_chunk_curr, telomere_tmp_candidates_sam_handle)
 
 		except StopIteration:
