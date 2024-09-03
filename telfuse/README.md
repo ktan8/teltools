@@ -50,5 +50,4 @@ If you have multiple samples (e.g. sample2_output.telomeric.aligned_ref.softclip
 You can then look at the output of the run as follows:
 ```
 less -S output_aggsites.aggregated_samples.edge.pon.teloclassification.filtered.genomeseq.txt
-
 ```
