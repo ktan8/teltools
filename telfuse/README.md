@@ -38,14 +38,17 @@ python aggregate_samples_and_annotate.py <folder_with_candidate_sites> <output_l
 
 For instance, for the example dataset in Step 1, we can create a directory 'aggregated', then copy in the file output.telomeric.aligned_ref.softclipped.sites.aggregated into it, and run the following command. 
 
-If you have multiple samples (e.g. sample2_output.telomeric.aligned_ref.softclipped.sites.aggregated, sample1_output.telomeric.aligned_ref.softclipped.sites.aggregated), you can also copy in the corresponding *.aggregated file into this directory. Result from all the samples would then be compiled into a single output file automatically.
-
 ```
 mkdir aggregated
 cp sample1_output.telomeric.aligned_ref.softclipped.sites.aggregated ./aggregated/
 python3 aggregate_samples_and_annotate.py ./aggregated/ output_aggsites ~/genome/Homo_sapiens_assembly38.fasta
 ```
 
+If you have multiple samples (e.g. sample2_output.telomeric.aligned_ref.softclipped.sites.aggregated, sample1_output.telomeric.aligned_ref.softclipped.sites.aggregated), you can also copy in the corresponding *.aggregated file into this directory. Result from all the samples would then be compiled into a single output file automatically.
 
 
+You can then look at the output of the run as follows:
+```
+less -S output_aggsites.aggregated_samples.edge.pon.teloclassification.filtered.genomeseq.txt
 
+```
